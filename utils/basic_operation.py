@@ -45,6 +45,3 @@ def gamma_transform(gray_src, gamma=0.3):
     out = np.power(normal, gamma)
     return out
 
-
-if __name__ == '__main__':
-    pass
