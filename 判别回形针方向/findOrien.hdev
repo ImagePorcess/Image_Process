@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<hdevelop file_version="1.1" halcon_version="12.0">
+<procedure name="main">
+<interface/>
+<body>
+<c></c>
+<l>read_image (Image, 'clip')</l>
+<c></c>
+<l>get_image_size (Image, Width, Height)</l>
+<c></c>
+<l>dev_close_window ()</l>
+<c></c>
+<l>dev_open_window (0, 0, Width, Height, 'black', WindowHandle)</l>
+<c></c>
+<l>dev_display (Image)</l>
+<c></c>
+<l>set_display_font (WindowHandle, 16, 'mono', 'true', 'false')</l>
+<c></c>
+<l>disp_continue_message (WindowHandle, 'black', 'true')</l>
+<c></c>
+<l>stop ()</l>
+<c></c>
+<l>dev_set_color ('red')</l>
+<c></c>
+<l>dev_set_draw ('margin')</l>
+<c></c>
+<l>gen_rectangle1 (ROI_0, 16.5, 16.5, 778.5, 772.5)</l>
+<c></c>
+<l>reduce_domain (Image, ROI_0, ImageReduced)</l>
+<c></c>
+<l>dev_set_draw ('fill')</l>
+<c></c>
+<l>threshold (ImageReduced, Regions, 8, 49)</l>
+<c></c>
+<l>dev_set_colored (12)</l>
+<c></c>
+<l>connection (Regions, ConnectedRegions)</l>
+<c></c>
+<l>select_shape (ConnectedRegions, SelectedRegions, 'area', 'and', 3972.48, 5990.83)</l>
+<c></c>
+<l>disp_continue_message (WindowHandle, 'black', 'true')</l>
+<c></c>
+<l>stop ()</l>
+<c></c>
+<l>dev_display (Image)</l>
+<c></c>
+<l>dev_set_color ('green')</l>
+<c></c>
+<l>dev_display (ConnectedRegions)</l>
+<c></c>
+<l>orientation_region (SelectedRegions, Phi)</l>
+<c></c>
+<l>area_center (SelectedRegions, Area, Row, Column)</l>
+<c></c>
+<l>dev_set_line_width (3)</l>
+<c></c>
+<l>dev_set_draw ('margin')</l>
+<c></c>
+<l>length := 80</l>
+<c></c>
+<l>dev_set_color ('blue')</l>
+<c></c>
+<l>disp_arrow (WindowHandle, Row, Column, Row - length * sin(Phi), Column + length * cos(Phi), 2)</l>
+<c></c>
+<l>disp_message (WindowHandle, deg(Phi)$'3.1f', 'window', Row/2 + 60, Column , 'black', 'false')</l>
+<c></c>
+<c></c>
+<c></c>
+<c></c>
+<c></c>
+<c></c>
+<c></c>
+<c></c>
+<c></c>
+<c></c>
+<c></c>
+<c></c>
+<c></c>
+<c></c>
+<c></c>
+<c></c>
+</body>
+<docu id="main">
+<parameters/>
+</docu>
+</procedure>
+</hdevelop>
