@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<hdevelop file_version="1.1" halcon_version="12.0.1">
+<hdevelop file_version="1.1" halcon_version="12.0">
 <procedure name="main">
 <interface/>
 <body>
@@ -25,7 +25,7 @@
 <l>dev_set_draw ('margin')</l>
 <c></c>
 <c>*产生矩形ROI</c>
-<l>gen_rectangle1 (Rectangle, 260, 90, 360, 350)</l>
+<l>gen_rectangle1 (Rectangle, 264.5, 83.5, 350.5, 340.5)</l>
 <c></c>
 <c>*减少图像区域</c>
 <l>reduce_domain (Image, Rectangle, ImageReduced)</l>
