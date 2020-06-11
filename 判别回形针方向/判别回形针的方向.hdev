@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<hdevelop file_version="1.1" halcon_version="12.0">
+<procedure name="main">
+<interface/>
+<body>
+<c>* clip.hdev: Orientation of clips</c>
+<c>* </c>
+<c>*打开一张图像</c>
+<l>read_image (Clip, 'clip')</l>
+<c></c>
+<c>*获取图像大小</c>
+<l>get_image_size (Clip, Width, Height)</l>
+<c></c>
+<c>*关闭已经打开的窗口</c>
+<l>dev_close_window ()</l>
+<c></c>
+<c>*打开新窗口</c>
+<l>dev_open_window (0, 0, Width/2 , Height/2 , 'black', WindowID)</l>
+<c></c>
+<c>*在新窗口里显示图像</c>
+<l>dev_display (Clip)</l>
+<c></c>
+<c>*设置窗口字体显示,字体大小，字体样式，粗体，斜体</c>
+<l>set_display_font (WindowID, 14, 'mono', 'true', 'false')</l>
+<c></c>
+<c>*在窗口右下方显示"Press Run  (F5) to  continue"字样</c>
+<l>disp_continue_message (WindowID, 'black', 'true')</l>
+<c></c>
+<c>*停止程序的执行</c>
+<l>stop ()</l>
+<c></c>
+<c>*二值化操作</c>
+<l>binary_threshold (Clip, Dark, 'max_separability', 'dark', UsedThreshold)</l>
+<c></c>
+<c>*将区域进行连通处理</c>
+<l>connection (Dark, Single)</l>
+<c></c>
+<c>*过滤出面积大小在【5000, 10000】范围里的区域</c>
+<l>select_shape (Single, Selected, 'area', 'and', 5000, 10000)</l>
+<c></c>
+<c>*设置区域的填充方式</c>
+<l>dev_set_draw ('fill')</l>
+<c></c>
+<c>*设置输出显示对象的颜色数目</c>
+<l>dev_set_colored (12)</l>
+<c></c>
+<c></c>
+<c>*在窗口右下方显示"Press Run  (F5) to  continue"字样</c>
+<l>disp_continue_message (WindowID, 'black', 'true')</l>
+<c></c>
+<c>*停止程序的执行</c>
+<l>stop ()</l>
+<c></c>
+<c>*显示图像</c>
+<l>dev_display (Clip)</l>
+<c></c>
+<c>*设置输出对象的颜色为绿色</c>
+<l>dev_set_color ('green')</l>
+<c></c>
+<c>*显示过滤后的区域</c>
+<l>dev_display (Selected)</l>
+<c></c>
+<c>*获取过滤后区域的方向</c>
+<l>orientation_region (Selected, Phi)</l>
+<c></c>
+<c>*获取过滤后区域的面积,中心的行坐标,列坐标</c>
+<l>area_center (Selected, Area, Row, Column)</l>
+<c></c>
+<c>*设置输出对象的线宽为3</c>
+<l>dev_set_line_width (3)</l>
+<c></c>
+<c>*设置区域的填充方式</c>
+<l>dev_set_draw ('margin')</l>
+<l>Length := 80</l>
+<c></c>
+<c>*设置输出对象的颜色为蓝色</c>
+<l>dev_set_color ('blue')</l>
+<c></c>
+<c>*在窗口上显示十字</c>
+<l>disp_arrow (WindowID, Row, Column, Row - Length * sin(Phi), Column + Length * cos(Phi), 4)</l>
+<c></c>
+<c>*在窗口上显示回形针的角度</c>
+<l>disp_message (WindowID, deg(Phi)$'3.1f', 'image', Row/2 , Column , 'black', 'false')</l>
+<c></c>
+</body>
+<docu id="main">
+<parameters/>
+</docu>
+</procedure>
+</hdevelop>

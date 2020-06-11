@@ -1,0 +1,319 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<hdevelop file_version="1.1" halcon_version="12.0">
+<procedure name="disp_message">
+<interface>
+<ic>
+<par name="WindowHandle" base_type="ctrl" dimension="0"/>
+<par name="String" base_type="ctrl" dimension="0"/>
+<par name="CoordSystem" base_type="ctrl" dimension="0"/>
+<par name="Row" base_type="ctrl" dimension="0"/>
+<par name="Column" base_type="ctrl" dimension="0"/>
+<par name="Color" base_type="ctrl" dimension="0"/>
+<par name="Box" base_type="ctrl" dimension="0"/>
+</ic>
+</interface>
+<body>
+<c>* This procedure displays text in a graphics window.</c>
+<c>* </c>
+<c>* Input parameters:</c>
+<c>* WindowHandle: The WindowHandle of the graphics window, where</c>
+<c>*    the message should be displayed</c>
+<c>* String: A tuple of strings containing the text message to be displayed</c>
+<c>* CoordSystem: If set to 'window', the text position is given</c>
+<c>*    with respect to the window coordinate system.</c>
+<c>*    If set to 'image', image coordinates are used.</c>
+<c>*    (This may be useful in zoomed images.)</c>
+<c>* Row: The row coordinate of the desired text position</c>
+<c>*    If set to -1, a default value of 12 is used.</c>
+<c>* Column: The column coordinate of the desired text position</c>
+<c>*    If set to -1, a default value of 12 is used.</c>
+<c>* Color: defines the color of the text as string.</c>
+<c>*    If set to [], '' or 'auto' the currently set color is used.</c>
+<c>*    If a tuple of strings is passed, the colors are used cyclically</c>
+<c>*    for each new textline.</c>
+<c>* Box: If Box[0] is set to 'true', the text is written within an orange box.</c>
+<c>*      If set to' false', no box is displayed.</c>
+<c>*      If set to a color string (e.g. 'white', '#FF00CC', etc.),</c>
+<c>*        the text is written in a box of that color.</c>
+<c>*      An optional second value for Box (Box[1]) controls if a shadow is displayed:</c>
+<c>*        'true' -&gt; display a shadow in a default color</c>
+<c>*        'false' -&gt; display no shadow (same as if no second value is given)</c>
+<c>*        otherwise -&gt; use given string as color string for the shadow color</c>
+<c>* </c>
+<c>* Prepare window</c>
+<l>get_rgb (WindowHandle, Red, Green, Blue)</l>
+<l>get_part (WindowHandle, Row1Part, Column1Part, Row2Part, Column2Part)</l>
+<l>get_window_extents (WindowHandle, RowWin, ColumnWin, WidthWin, HeightWin)</l>
+<l>set_part (WindowHandle, 0, 0, HeightWin - 1, WidthWin - 1)</l>
+<c>* </c>
+<c>* default settings</c>
+<l>if (Row == -1)</l>
+<l>    Row := 24</l>
+<l>endif</l>
+<l>if (Column == -1)</l>
+<l>    Column := 12</l>
+<l>endif</l>
+<l>if (Color == [])</l>
+<l>    Color := ''</l>
+<l>endif</l>
+<c>* </c>
+<l>String := split('' + String + '','\n')</l>
+<c>* </c>
+<c>* Estimate extentions of text depending on font size.</c>
+<l>get_font_extents (WindowHandle, MaxAscent, MaxDescent, MaxWidth, MaxHeight)</l>
+<l>if (CoordSystem == 'window')</l>
+<l>    R1 := Row</l>
+<l>    C1 := Column</l>
+<l>else</l>
+<c>    * Transform image to window coordinates</c>
+<l>    FactorRow := 1. * HeightWin / (Row2Part - Row1Part + 1)</l>
+<l>    FactorColumn := 1. * WidthWin / (Column2Part - Column1Part + 1)</l>
+<l>    R1 := (Row - Row1Part + 0.5) * FactorRow</l>
+<l>    C1 := (Column - Column1Part + 0.5) * FactorColumn</l>
+<l>endif</l>
+<c>* </c>
+<c>* Display text box depending on text size</c>
+<l>UseShadow := true</l>
+<l>ShadowColor := 'gray'</l>
+<l>if (Box[0] == 'true')</l>
+<l>    Box[0] := '#fce9d4'</l>
+<l>    ShadowColor := '#f28d26'</l>
+<l>endif</l>
+<l>if (|Box| &gt; 1)</l>
+<l>    if (Box[1] == 'true')</l>
+<c>        * Use default ShadowColor set above</c>
+<l>    elseif (Box[1] == 'false')</l>
+<l>        UseShadow := false</l>
+<l>    else</l>
+<l>        ShadowColor := Box[1]</l>
+<c>        * Valid color?</c>
+<l>        try</l>
+<l>            set_color (WindowHandle, Box[1])</l>
+<l>        catch (Exception)</l>
+<l>            Exception := 'Wrong value of control parameter Box[1] (must be a \'true\', \'false\', or a valid color string)'</l>
+<l>            throw (Exception)</l>
+<l>        endtry</l>
+<l>    endif</l>
+<l>endif</l>
+<l>if (Box[0] != 'false')</l>
+<c>    * Valid color?</c>
+<l>    try</l>
+<l>        set_color (WindowHandle, Box[0])</l>
+<l>    catch (Exception)</l>
+<l>        Exception := 'Wrong value of control parameter Box[0] (must be a \'true\', \'false\', or a valid color string)'</l>
+<l>        throw (Exception)</l>
+<l>    endtry</l>
+<c>    * Calculate box extents</c>
+<l>    String := ' ' + String + ' '</l>
+<l>    Width := []</l>
+<l>    for Index := 0 to |String| - 1 by 1</l>
+<l>        get_string_extents (WindowHandle, String[Index], Ascent, Descent, W, H)</l>
+<l>        Width := [Width,W]</l>
+<l>    endfor</l>
+<l>    FrameHeight := MaxHeight * |String|</l>
+<l>    FrameWidth := max([0,Width])</l>
+<l>    R2 := R1 + FrameHeight</l>
+<l>    C2 := C1 + FrameWidth</l>
+<c>    * Display rectangles</c>
+<l>    get_draw (WindowHandle, DrawMode)</l>
+<l>    set_draw (WindowHandle, 'fill')</l>
+<c>    * Set shadow color</c>
+<l>    set_color (WindowHandle, ShadowColor)</l>
+<l>    if (UseShadow)</l>
+<l>        disp_rectangle1 (WindowHandle, R1 + 1, C1 + 1, R2 + 1, C2 + 1)</l>
+<l>    endif</l>
+<c>    * Set box color</c>
+<l>    set_color (WindowHandle, Box[0])</l>
+<l>    disp_rectangle1 (WindowHandle, R1, C1, R2, C2)</l>
+<l>    set_draw (WindowHandle, DrawMode)</l>
+<l>endif</l>
+<c>* Write text.</c>
+<l>for Index := 0 to |String| - 1 by 1</l>
+<l>    CurrentColor := Color[Index % |Color|]</l>
+<l>    if (CurrentColor != '' and CurrentColor != 'auto')</l>
+<l>        set_color (WindowHandle, CurrentColor)</l>
+<l>    else</l>
+<l>        set_rgb (WindowHandle, Red, Green, Blue)</l>
+<l>    endif</l>
+<l>    Row := R1[Index] + MaxHeight * Index</l>
+<l>    set_tposition (WindowHandle, Row, C1[Index])</l>
+<l>    write_string (WindowHandle, String[Index])</l>
+<l>endfor</l>
+<c>* Reset changed window settings</c>
+<l>set_rgb (WindowHandle, Red, Green, Blue)</l>
+<l>set_part (WindowHandle, Row1Part, Column1Part, Row2Part, Column2Part)</l>
+<l>return ()</l>
+</body>
+<docu id="disp_message">
+<abstract lang="en_US">This procedure displays text in a graphics window WindowHandle at the position (Row,Column).
+If String is a tuple, one text line is displayed for each entry. Also, '\n' will be interpreted as a newline character, i.e. a line break is performed. Empty strings (or empty parts before or after a newline) are ignored. To write empty lines, use a whitespace character.
+
+The position of the text may be specified in window coordinates (CoordSystem = 'window') or in image coordinates (CoordSystem = 'image'), which is useful when using zoomed images.
+
+The parameter Color also accepts tuples of values. In that case, the specified colors are used cyclically for every new textline.
+
+Box:
+If set to 'true', the text is written within an orange box.
+If set to' false', no box is displayed.
+If set to a color string (e.g. 'white', '#FF00CC', etc.), the text is written in a box of that color.
+
+</abstract>
+<alternatives>
+<item>write_string</item>
+<item>disp_continue_message</item>
+</alternatives>
+<chapters>
+<item>Graphics</item>
+<item>Text</item>
+</chapters>
+<chapters lang="de_DE">
+<item>Graphik</item>
+<item>Text</item>
+</chapters>
+<chapters lang="en_US">
+<item>Graphics</item>
+<item>Text</item>
+</chapters>
+<example lang="en_US">dev_open_window (0, 0, 512, 512, 'black', WindowHandle)
+set_display_font (WindowHandle, 16, 'mono', 'true', 'false')
+disp_message (WindowHandle, ['Hello','world!'], 'window', -1, -1, ['black','blue'], 'true')
+</example>
+<keywords lang="de_DE">
+<item>Meldung anzeigen</item>
+</keywords>
+<keywords lang="en_US">
+<item>display message</item>
+</keywords>
+<library lang="de_DE">MVTec Standard Procedures</library>
+<library lang="en_US">MVTec Standard Procedures</library>
+<predecessor>
+<item>dev_open_window</item>
+<item>set_display_font</item>
+<item>dev_open_window_fit_image</item>
+<item>dev_open_window_fit_size</item>
+<item>dev_display</item>
+<item>disp_obj</item>
+<item>disp_image</item>
+</predecessor>
+<see_also>
+<item>write_string</item>
+<item>disp_continue_message</item>
+</see_also>
+<short>This procedure writes a text message.</short>
+<short lang="de_DE">This procedure writes a text message.</short>
+<short lang="en_US">This procedure writes a text message.</short>
+<successor>
+<item>disp_continue_message</item>
+<item>dev_display</item>
+<item>disp_obj</item>
+</successor>
+<parameters>
+<parameter id="Box">
+<default_type>string</default_type>
+<default_value>'true'</default_value>
+<description lang="en_US">If set to 'true', the text is written within a white box.</description>
+<multivalue>false</multivalue>
+<sem_type>attribute.value</sem_type>
+<type_list>
+<item>string</item>
+</type_list>
+<value_list>
+<item>'true'</item>
+<item>'false'</item>
+</value_list>
+</parameter>
+<parameter id="Color">
+<default_type>string</default_type>
+<default_value>'black'</default_value>
+<description lang="en_US">Defines the color of the text as string. If set to [], or '' the currently set color is used. If a tuple of strings is passed, the colors are used cyclically for each new textline.</description>
+<mixed_type>false</mixed_type>
+<multivalue>optional</multivalue>
+<sem_type>color</sem_type>
+<type_list>
+<item>string</item>
+</type_list>
+<values>
+<item>''</item>
+<item>'black'</item>
+<item>'blue'</item>
+<item>'yellow'</item>
+<item>'red'</item>
+<item>'green'</item>
+<item>'cyan'</item>
+<item>'magenta'</item>
+<item>'forest green'</item>
+<item>'lime green'</item>
+<item>'coral'</item>
+<item>'slate blue'</item>
+</values>
+</parameter>
+<parameter id="Column">
+<default_type>integer</default_type>
+<default_value>12</default_value>
+<description lang="en_US">The column coordinate of the desired text position. If set to -1, a default value of 12 is used.</description>
+<multivalue>false</multivalue>
+<sem_type>point.x</sem_type>
+<type_list>
+<item>integer</item>
+<item>real</item>
+</type_list>
+<values>
+<item>[10,12,20]</item>
+</values>
+</parameter>
+<parameter id="CoordSystem">
+<default_type>string</default_type>
+<default_value>'window'</default_value>
+<description lang="en_US">If set to 'window', the text position is given with respect to the window coordinate system. If set to 'image', image coordinates are used (This may be useful in zoomed images).</description>
+<mixed_type>false</mixed_type>
+<multivalue>false</multivalue>
+<sem_type>attribute.value</sem_type>
+<type_list>
+<item>string</item>
+</type_list>
+<value_list>
+<item>'window'</item>
+<item>'image'</item>
+</value_list>
+</parameter>
+<parameter id="Row">
+<default_type>integer</default_type>
+<default_value>12</default_value>
+<description lang="en_US">The row coordinate of the desired text position. If set to -1, a default value of 12 is used.</description>
+<multivalue>false</multivalue>
+<sem_type>point.y</sem_type>
+<type_list>
+<item>integer</item>
+<item>real</item>
+</type_list>
+<values>
+<item>[10,12,20,30]</item>
+</values>
+</parameter>
+<parameter id="String">
+<default_type>string</default_type>
+<description lang="en_US">A tuple of strings containing the text message to be displayed. Each value of the tuple will be displayed in a single line.
+</description>
+<mixed_type>optional</mixed_type>
+<multivalue>optional</multivalue>
+<sem_type>string</sem_type>
+<type_list>
+<item>integer</item>
+<item>real</item>
+<item>string</item>
+</type_list>
+</parameter>
+<parameter id="WindowHandle">
+<default_type>integer</default_type>
+<description lang="en_US">The window handle of the graphics window, where the message should be displayed.</description>
+<mixed_type>false</mixed_type>
+<multivalue>false</multivalue>
+<sem_type>window</sem_type>
+<type_list>
+<item>integer</item>
+</type_list>
+</parameter>
+</parameters>
+</docu>
+</procedure>
+</hdevelop>
